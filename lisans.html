@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CK Desktop PRO — Mobil Lisans Üretici</title>
+    <!-- CryptoJS for HMAC-SHA256 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #060b16; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #0c1830; border: 1px solid #1e3055; border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 20px; color: #38bdf8; margin-bottom: 6px; text-align: center; }
+        p.sub { font-size: 13px; color: #94a3b8; text-align: center; margin-bottom: 20px; }
+        label { font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-top: 14px; margin-bottom: 6px; }
+        input { width: 100%; background: #070d1a; border: 1px solid #243658; border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 15px; outline: none; }
+        input:focus { border-color: #38bdf8; }
+        button.btn-gen { width: 100%; background: linear-gradient(90deg, #0284c7, #7c3aed); color: #fff; font-weight: bold; font-size: 16px; border: none; border-radius: 12px; padding: 14px; margin-top: 20px; cursor: pointer; }
+        button.btn-gen:active { opacity: 0.8; }
+        .res-box { margin-top: 20px; background: #070d1a; border: 1.5px dashed #34d399; border-radius: 12px; padding: 16px; display: none; }
+        .key-text { font-size: 17px; font-weight: bold; color: #34d399; word-break: break-all; text-align: center; margin: 8px 0; letter-spacing: 1px; }
+        button.btn-copy { width: 100%; background: #059669; color: #fff; border: none; border-radius: 8px; padding: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔐 CK Desktop PRO</h1>
+        <p class="sub">Mobil Lisans Anahtarı Üretici (Sadece Cihan Kuçat İçindir)</p>
+
+        <label>Müşteri Adı Soyadı:</label>
+        <input type="text" id="custName" placeholder="Örn: Ahmet Yılmaz">
+
+        <label>Müşteri Cihaz Kodu (HWID):</label>
+        <input type="text" id="hwid" placeholder="Örn: 2306-95A5-52C2">
+
+        <button class="btn-gen" onclick="generateKey()">🔑 Lisans Üret & WhatsApp Mesajı Hazırla</button>
+
+        <div class="res-box" id="resBox">
+            <div style="font-size:12px; color:#94a3b8; text-align:center;">ÜRETİLEN LİSANS ANAHTARI:</div>
+            <div class="key-text" id="keyVal"></div>
+            <button class="btn-copy" id="copyBtn" onclick="copyMessage()">📋 Müşteri Teslim Mesajını Kopyala</button>
+        </div>
+    </div>
+
+    <script>
+        const MASTER_SECRET = "CK_DESKTOP_PRO_2026_ULTRA_SECURE_HMAC_KEY_v4_9981";
+
+        function generateKey() {
+            const rawHwid = document.getElementById("hwid").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+            const name = document.getElementById("custName").value.trim() || "Değerli Müşterimiz";
+
+            if (!rawHwid) {
+                alert("Lütfen müşterinin WhatsApp'tan attığı Cihaz Kodunu (HWID) girin!");
+                return;
+            }
+
+            const prefix = "CKHW";
+            const chars = "0123456789ABCDEF";
+            let seed = "";
+            for (let i = 0; i < 8; i++) seed += chars[Math.floor(Math.random() * chars.length)];
+
+            const b1 = seed.substring(0, 4);
+            const b2 = seed.substring(4, 8);
+
+            const msg = `${prefix}|${b1}|${b2}|${rawHwid}`;
+            const hash = CryptoJS.HmacSHA256(msg, MASTER_SECRET);
+            const hashHex = hash.toString(CryptoJS.enc.Hex).toUpperCase();
+
+            const b3 = hashHex.substring(0, 4);
+            const b4 = hashHex.substring(4, 8);
+
+            const finalKey = `${prefix}-${b1}-${b2}-${b3}-${b4}`;
+
+            document.getElementById("keyVal").innerText = finalKey;
+            document.getElementById("resBox").style.display = "block";
+
+            window.preparedMsg = `Ödemeniz onaylandı, hayırlı olsun! 🎉\n\n` +
+                `👤 Lisans Sahibi: ${name}\n` +
+                `💎 CK Desktop PRO Ömür Boyu Lisans Anahtarınız:\n` +
+                `👉 ${finalKey}\n\n` +
+                `Nasıl Etkinleştirilir?\n` +
+                `1. Programı açın ve "Lisans & PRO" sekmesine geçin.\n` +
+                `2. Yukarıdaki anahtarı yapıştırıp "Lisansı Etkinleştir" butonuna basın.\n\n` +
+                `İyi çalışmalar dileriz!`;
+        }
+
+        function copyMessage() {
+            navigator.clipboard.writeText(window.preparedMsg).then(() => {
+                const b = document.getElementById("copyBtn");
+                b.innerText = "✓ Teslim Mesajı Kopyalandı!";
+                setTimeout(() => b.innerText = "📋 Müşteri Teslim Mesajını Kopyala", 2500);
+            });
+        }
+    </script>
+</body>
+</html>
